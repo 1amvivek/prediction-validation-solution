@@ -58,9 +58,8 @@ def calculate_error(actual_values, predict_values):
 		print("Calculating the error for {} hour".format(current_hour))	
 		current_predict = predict_values[predict_values[0] == current_hour][[1,2]] # getting all predict values for choosen current_hour
 		current_actual = actual_values[actual_values[0] == current_hour][[1,2]] # getting all actual values for choosen current_hour
-		diff = current_predict.set_index(1).subtract(current_actual.set_index(1)).abs().dropna() # subtract the actual value from predict value
-		error[current_hour] = diff[2].values
-	print(error)
+		diff = current_actual.set_index(1).subtract(current_predict.set_index(1)).abs().dropna() # subtract the actual value from predict value
+		error[current_hour] = np.round_(diff[2].values, decimals=2)
 	return error
 
 
@@ -106,6 +105,8 @@ def run(window, actual, predicted, output):
 	predict_values = get_predict_values(predict)
 	error = calculate_error(actual_values, predict_values)
 	rows = calculate_average_error(error, get_min_hour_value(actual_values[0]), get_max_hour_value(actual_values[0]), window_size)
+	# rows = calculate_average_error(error, 299, 302, window_size)
+
 	write_ouput(rows, output)
 	print("Processing Completed.")
 
