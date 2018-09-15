@@ -4,6 +4,8 @@ import sys
 import os
 import csv
 
+pd.set_option('precision', 5)
+
 def get_min_hour_value(df):
 	'''
 		Returns minimum hour value
@@ -28,6 +30,7 @@ def get_window_size(window):
 		assert (len(window_size) == 1), "File contains more characters, something wrong"
 		return int(window_size)
 
+
 def get_actual_values(actual):
 	'''
 		Reads actual file
@@ -35,12 +38,14 @@ def get_actual_values(actual):
 	'''
 	return pd.read_csv(actual, sep='|', header=None)
 
+
 def get_predict_values(predict):
 	'''
 		Reads predict file
 		Returns predict values as dataframe
 	'''
 	return pd.read_csv(predict, sep='|', header=None)
+
 
 def calculate_error(actual_values, predict_values):
 	'''
@@ -54,9 +59,10 @@ def calculate_error(actual_values, predict_values):
 		current_predict = predict_values[predict_values[0] == current_hour][[1,2]] # getting all predict values for choosen current_hour
 		current_actual = actual_values[actual_values[0] == current_hour][[1,2]] # getting all actual values for choosen current_hour
 		diff = current_predict.set_index(1).subtract(current_actual.set_index(1)).abs().dropna() # subtract the actual value from predict value
-		error[current_hour] = (diff[2].values)
-
+		error[current_hour] = diff[2].values
+	print(error)
 	return error
+
 
 def calculate_average_error(error, min_hour, max_hour, window_size):
 	'''
@@ -77,16 +83,17 @@ def calculate_average_error(error, min_hour, max_hour, window_size):
 				total_error = error[i]
 				continue
 			total_error = np.append(total_error, error[i])
-		current_row = []
-		current_row.extend(( current_hour, current_hour + window_size -1, round(np.average(total_error), 2) ))
-		rows.append(current_row)
+			current_row = []
+			current_row.extend( ( current_hour, current_hour + window_size -1, '{:.2f}'.format(np.round_(np.average(total_error), decimals=2)) ) )
+			rows.append(current_row)
 	return rows
 
 def write_ouput(rows, output):
 	'''
 		Writes ouput to a file with delimiter '|'
 	'''
-	with open(output, "wb") as f:
+	print(rows)
+	with open(output, "w") as f:
 	    writer = csv.writer(f, delimiter='|')
 	    writer.writerows(rows)
 	    print("Ouput file written to {}".format(output))
